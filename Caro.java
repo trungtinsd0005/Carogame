@@ -15,20 +15,20 @@ public class Caro extends JFrame implements ActionListener {
 	Container cn;
 	JPanel pn, pn2;
 	JLabel lb;
-	JLabel timerX, timerY;
+	JLabel timerX, timerO;
 	JButton newGame_bt, undo_bt, exit_bt;
 	public String turnX = "Lượt của X";
 	public String turnO = "Lượt của O";
 	private JButton b[][] = new JButton[column + 2][row + 2];
 	public StopWatch stopWatch1;
-	public StopWatch stopWatch2;
+	public StopWatch2 stopWatch2;
 	private boolean paused1;
 	private boolean paused2;
 	private JLabel labelTimeX, labelTimeY;
 	public Caro(String s) {
 		super(s);
 		stopWatch1 = new StopWatch();
-		stopWatch2 = new StopWatch();
+		stopWatch2 = new StopWatch2();
 		cn =this.getContentPane();
 		pn = new JPanel();
 		pn.setLayout(new GridLayout(column,row));
@@ -44,13 +44,15 @@ public class Caro extends JFrame implements ActionListener {
 			for (int j = 1; j <= row; j++)
 				pn.add(b[i][j]);
 		lb = new JLabel("X Đánh Trước");
+		startTimerO();
+		startTimerX();
 		newGame_bt = new JButton("New Game");
 		undo_bt = new JButton("Undo");
 		exit_bt = new JButton("Exit");
-		labelTimeX = new JLabel("Thời gian còn lại của X:");
-		timerX = new JLabel("50:000");
-		labelTimeY = new JLabel("Thời gian còn lại của O:");
-		timerY = new JLabel("50:000");
+		labelTimeX = new JLabel("Thời gian chơi của X:");
+		timerX = new JLabel("00:000");
+		labelTimeY = new JLabel("Thời gian chơi của O:");
+		timerO = new JLabel("00:000");
 		newGame_bt.addActionListener(this);
 		undo_bt.addActionListener(this);
 		exit_bt.addActionListener(this);
@@ -66,7 +68,7 @@ public class Caro extends JFrame implements ActionListener {
 		pn2.add(undo_bt);
 		pn2.add(exit_bt);
 		pn2.add(labelTimeY);
-		pn2.add(timerY);
+		pn2.add(timerO);
 		cn.add(pn2,"North");
 		cn.setSize(400, 400);
 		this.setVisible(true);
@@ -147,23 +149,31 @@ public class Caro extends JFrame implements ActionListener {
 		}
 	}
 	public synchronized void addPoint(int i, int j) {
+		int k = 0, z = 0;
 		if (Size > 0)
 			b[xUndo[Size - 1]][yUndo[Size - 1]].setBackground(background_cl);
 		xUndo[Size] = i;
 		yUndo[Size] = j;
 		Size++;
-			if (count % 2 == 0) {
-				b[i][j].setText("X");
-				b[i][j].setForeground(x_cl);
-			}else {
-				b[i][j].setText("O");
-				b[i][j].setForeground(y_cl);
-				lb.setText(turnX);
-			}
-			count = 1 - count;
-			tick[i][j] = false;
-			b[i][j].setBackground(Color.GRAY);
-			undo_bt.setEnabled(true);
+		if (count % 2 == 0) {
+			b[i][j].setText("X");
+			b[i][j].setForeground(x_cl);
+			lb.setText("Lượt Của O");
+			stopWatch1.pause();
+			paused1 = true;
+			
+		}else {
+			b[i][j].setText("O");
+			b[i][j].setForeground(y_cl);
+			lb.setText("Lượt Của X");
+			stopWatch2.pause();
+			paused2 = true;
+			// stopWatch2.resume();
+		}
+		count = 1 - count;
+		tick[i][j] = false;
+		b[i][j].setBackground(Color.GRAY);
+		undo_bt.setEnabled(true);
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -185,12 +195,17 @@ public class Caro extends JFrame implements ActionListener {
 			int i = Integer.parseInt(s.substring(0, k));
 			int j = Integer.parseInt(s.substring(k + 1, s.length()));
 			if (tick[i][j]) {
-				addPoint(i, j);
-				if(lb.getText().equals(turnO)) {
-					startTimerO();
-				}else if(lb.getText().equals(turnX)) {
-					startTimerX();
+				if(lb.getText().equals("Lượt Của O")) {
+					// stopWatch2.resume();
+					stopWatch1.resume();
+					paused1 = false;
+				}else if(lb.getText().equals("Lượt Của X")) {
+					// stopWatch1.resume();
+					stopWatch2.resume();
+					paused2 = false;
 				}
+				addPoint(i, j);
+				
 			}
 			if (checkWin(i, j)) {
 				lb.setBackground(Color.MAGENTA);
@@ -227,7 +242,7 @@ public class Caro extends JFrame implements ActionListener {
                 while (true) {
                     if (!paused2) {
                         final String timeString = new SimpleDateFormat("ss:SSS").format(stopWatch2.getElapsedTime());
-                        timerY.setText("" + timeString);
+                        timerO.setText("" + timeString);
                     }
                 }
             }

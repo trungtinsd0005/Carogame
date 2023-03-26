@@ -1,6 +1,6 @@
-public class StopWatch {
+public class StopWatch2 {
 
-   private long startTime = 0;
+    private long startTime = 0;
    private long stopTime = 0;
    private long pausedTime = 0;
    private boolean running = false;
@@ -41,8 +41,9 @@ public class StopWatch {
        }
        return elapsed;
    }
-}
-
-
-
-
+ }
+ 
+ 
+ 
+ 
+ 
