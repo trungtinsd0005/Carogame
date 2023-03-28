@@ -21,6 +21,7 @@ public class Caro extends JFrame implements ActionListener {
 	public String turnO = "Lượt của O";
 	private JButton b[][] = new JButton[column + 2][row + 2];
 	public StopWatch stopWatch1;
+	String timeLose = "10:000";
 	public StopWatch2 stopWatch2;
 	private boolean paused1;
 	private boolean paused2;
@@ -44,8 +45,6 @@ public class Caro extends JFrame implements ActionListener {
 			for (int j = 1; j <= row; j++)
 				pn.add(b[i][j]);
 		lb = new JLabel("X Đánh Trước");
-		startTimerO();
-		startTimerX();
 		newGame_bt = new JButton("New Game");
 		undo_bt = new JButton("Undo");
 		exit_bt = new JButton("Exit");
@@ -148,8 +147,7 @@ public class Caro extends JFrame implements ActionListener {
 				undo_bt.setEnabled(false);
 		}
 	}
-	public synchronized void addPoint(int i, int j) {
-		int k = 0, z = 0;
+	public void addPoint(int i, int j) {
 		if (Size > 0)
 			b[xUndo[Size - 1]][yUndo[Size - 1]].setBackground(background_cl);
 		xUndo[Size] = i;
@@ -159,15 +157,20 @@ public class Caro extends JFrame implements ActionListener {
 			b[i][j].setText("X");
 			b[i][j].setForeground(x_cl);
 			lb.setText("Lượt Của O");
-			stopWatch1.pause();
-			paused1 = true;
+			// paused1 = true;
+			startTimerO();
 			
+			stopWatch1.pause();
+			stopWatch2.resume();
 		}else {
 			b[i][j].setText("O");
 			b[i][j].setForeground(y_cl);
 			lb.setText("Lượt Của X");
+			// paused2 = true;
+			startTimerX();
 			stopWatch2.pause();
-			paused2 = true;
+			stopWatch1.resume();
+			
 			// stopWatch2.resume();
 		}
 		count = 1 - count;
@@ -197,24 +200,27 @@ public class Caro extends JFrame implements ActionListener {
 			if (tick[i][j]) {
 				if(lb.getText().equals("Lượt Của O")) {
 					// stopWatch2.resume();
-					stopWatch1.resume();
-					paused1 = false;
+					paused2 = false;
 				}else if(lb.getText().equals("Lượt Của X")) {
 					// stopWatch1.resume();
-					stopWatch2.resume();
-					paused2 = false;
+					// stopWatch2.resume();
+					paused1 = false;
 				}
 				addPoint(i, j);
 				
 			}
 			if (checkWin(i, j)) {
 				lb.setBackground(Color.MAGENTA);
-				lb.setText(b[i][j].getText() + " WIN");
 				for (i = 1; i <= column; i++)
-					for (j = 1; j <= row; j++) 
-						b[i][j].setEnabled(false);
+				for (j = 1; j <= row; j++) 
+				b[i][j].setEnabled(false);
 				undo_bt.setEnabled(false);
 				newGame_bt.setBackground(Color.YELLOW);
+				stopWatch1.stop();
+				paused1 = true;
+				stopWatch2.stop();
+				paused2 = true;
+				JOptionPane.showMessageDialog(null, "Trò chơi kết thúc");
 			}
 		}	
 	}
@@ -228,6 +234,12 @@ public class Caro extends JFrame implements ActionListener {
                         final String timeString = new SimpleDateFormat("ss:SSS").format(stopWatch1.getElapsedTime());
                         timerX.setText("" + timeString);
                     }
+
+					if(timerX.getText().equals(timeLose)) {
+						stopWatch1.stop();
+						JOptionPane.showMessageDialog(null, "X đã thua");
+						break;
+					}
                 }
             }
         });
@@ -244,6 +256,12 @@ public class Caro extends JFrame implements ActionListener {
                         final String timeString = new SimpleDateFormat("ss:SSS").format(stopWatch2.getElapsedTime());
                         timerO.setText("" + timeString);
                     }
+
+					if(timerO.getText().equals(timeLose)) {
+						stopWatch2.stop();
+						JOptionPane.showMessageDialog(null, "O đã thua");
+						break;
+					}
                 }
             }
         });
